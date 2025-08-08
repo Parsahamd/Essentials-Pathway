@@ -1,20 +1,21 @@
 using UnityEngine;
 using TMPro;
-using System; // Required for Type handling
 
 public class UpdateCollectibleCount : MonoBehaviour
 {
-    private TextMeshProUGUI collectibleText; // Reference to the TextMeshProUGUI component
+    public GameObject confettiPrefab;  // Assign the prefab here
+    private TextMeshProUGUI collectibleText;
+    private bool celebrationTriggered = false;
 
     void Start()
     {
         collectibleText = GetComponent<TextMeshProUGUI>();
         if (collectibleText == null)
         {
-            Debug.LogError("UpdateCollectibleCount script requires a TextMeshProUGUI component on the same GameObject.");
+            Debug.LogError("UpdateCollectibleCount requires a TextMeshProUGUI component.");
             return;
         }
-        UpdateCollectibleDisplay(); // Initial update on start
+        UpdateCollectibleDisplay();
     }
 
     void Update()
@@ -24,23 +25,27 @@ public class UpdateCollectibleCount : MonoBehaviour
 
     private void UpdateCollectibleDisplay()
     {
-        int totalCollectibles = 0;
-
-        // Check and count objects of type Collectible
-        Type collectibleType = Type.GetType("Collectible");
-        if (collectibleType != null)
-        {
-            totalCollectibles += UnityEngine.Object.FindObjectsByType(collectibleType, FindObjectsSortMode.None).Length;
-        }
-
-        // Optionally, check and count objects of type Collectible2D as well if needed
-        Type collectible2DType = Type.GetType("Collectible2D");
-        if (collectible2DType != null)
-        {
-            totalCollectibles += UnityEngine.Object.FindObjectsByType(collectible2DType, FindObjectsSortMode.None).Length;
-        }
-
-        // Update the collectible count display
+        int totalCollectibles = GameObject.FindGameObjectsWithTag("Collectible").Length;
         collectibleText.text = $"Collectibles remaining: {totalCollectibles}";
+
+        if (totalCollectibles == 0 && !celebrationTriggered)
+        {
+            celebrationTriggered = true;
+            TriggerConfetti();
+        }
+    }
+
+    private void TriggerConfetti()
+    {
+        if (confettiPrefab != null)
+        {
+            // Instantiate at player position or any position you want
+            Instantiate(confettiPrefab, Vector3.zero, Quaternion.identity);
+            Debug.Log("🎉 Confetti instantiated!");
+        }
+        else
+        {
+            Debug.LogWarning("Confetti prefab is not assigned.");
+        }
     }
 }
